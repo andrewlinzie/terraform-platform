@@ -11,3 +11,15 @@
 
 # Logs
 *.log
+
+# Terraform local files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+**/terraform.tfvars
+*.auto.tfvars
+
+# Terraform variable files (local-only)
+terraform.tfvars
+*.auto.tfvars
