@@ -132,4 +132,4 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ needs.set-context.outputs.working_dir }}
-        run: terraform plan -no-color -input=false -var-file=ci.tfvars
+        run: terraform apply -auto-approve -input=false -var-file=ci.tfvars
