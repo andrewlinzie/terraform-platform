@@ -36,7 +36,6 @@ jobs:
     outputs:
       environment: ${{ steps.set.outputs.environment }}
       working_dir: ${{ steps.set.outputs.working_dir }}
-      role_arn: ${{ steps.set.outputs.role_arn }}
     steps:
       - name: Set context
         id: set
@@ -49,14 +48,6 @@ jobs:
 
           echo "environment=$ENV" >> $GITHUB_OUTPUT
           echo "working_dir=environments/$ENV" >> $GITHUB_OUTPUT
-
-          if [ "$ENV" = "dev" ]; then
-            echo "role_arn=${{ secrets.AWS_ROLE_ARN_DEV }}" >> $GITHUB_OUTPUT
-          elif [ "$ENV" = "staging" ]; then
-            echo "role_arn=${{ secrets.AWS_ROLE_ARN_STAGING }}" >> $GITHUB_OUTPUT
-          elif [ "$ENV" = "prod" ]; then
-            echo "role_arn=${{ secrets.AWS_ROLE_ARN_PROD }}" >> $GITHUB_OUTPUT
-          fi
 
   fmt-validate:
     runs-on: ubuntu-latest
@@ -71,7 +62,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.set-context.outputs.role_arn }}
+          role-to-assume: ${{ needs.set-context.outputs.environment == 'dev' && secrets.AWS_ROLE_ARN_DEV || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_PROD }}
           aws-region: us-east-2
 
       - name: Terraform Init
@@ -98,7 +89,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.set-context.outputs.role_arn }}
+          role-to-assume: ${{ needs.set-context.outputs.environment == 'dev' && secrets.AWS_ROLE_ARN_DEV || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_PROD }}
           aws-region: us-east-2
 
       - name: Terraform Init
@@ -126,7 +117,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.set-context.outputs.role_arn }}
+          role-to-assume: ${{ needs.set-context.outputs.environment == 'dev' && secrets.AWS_ROLE_ARN_DEV || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_PROD }}
           aws-region: us-east-2
 
       - name: Terraform Init
