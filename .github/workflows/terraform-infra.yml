@@ -1,0 +1,138 @@
+name: Terraform Infra
+
+on:
+  pull_request:
+    paths:
+      - 'modules/**'
+      - 'environments/**'
+      - '.github/workflows/**'
+      - 'backend/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/**'
+      - 'environments/**'
+      - '.github/workflows/**'
+      - 'backend/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  set-context:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set.outputs.environment }}
+      working_dir: ${{ steps.set.outputs.working_dir }}
+      role_arn: ${{ steps.set.outputs.role_arn }}
+    steps:
+      - name: Set context
+        id: set
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ENV="${{ github.event.inputs.environment }}"
+          else
+            ENV="dev"
+          fi
+
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          echo "working_dir=environments/$ENV" >> $GITHUB_OUTPUT
+
+          if [ "$ENV" = "dev" ]; then
+            echo "role_arn=${{ secrets.AWS_ROLE_ARN_DEV }}" >> $GITHUB_OUTPUT
+          elif [ "$ENV" = "staging" ]; then
+            echo "role_arn=${{ secrets.AWS_ROLE_ARN_STAGING }}" >> $GITHUB_OUTPUT
+          elif [ "$ENV" = "prod" ]; then
+            echo "role_arn=${{ secrets.AWS_ROLE_ARN_PROD }}" >> $GITHUB_OUTPUT
+          fi
+
+  fmt-validate:
+    runs-on: ubuntu-latest
+    needs: set-context
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ needs.set-context.outputs.role_arn }}
+          aws-region: us-east-2
+
+      - name: Terraform Init
+        working-directory: ${{ needs.set-context.outputs.working_dir }}
+        run: terraform init
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        working-directory: ${{ needs.set-context.outputs.working_dir }}
+        run: terraform validate
+
+  plan:
+    runs-on: ubuntu-latest
+    needs: [set-context, fmt-validate]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ needs.set-context.outputs.role_arn }}
+          aws-region: us-east-2
+
+      - name: Terraform Init
+        working-directory: ${{ needs.set-context.outputs.working_dir }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ${{ needs.set-context.outputs.working_dir }}
+        run: terraform plan -no-color
+
+  apply:
+    runs-on: ubuntu-latest
+    needs: [set-context, plan]
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.set-context.outputs.environment == 'dev') ||
+      (github.event_name == 'workflow_dispatch' && (needs.set-context.outputs.environment == 'staging' || needs.set-context.outputs.environment == 'prod'))
+    environment: ${{ needs.set-context.outputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ needs.set-context.outputs.role_arn }}
+          aws-region: us-east-2
+
+      - name: Terraform Init
+        working-directory: ${{ needs.set-context.outputs.working_dir }}
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ${{ needs.set-context.outputs.working_dir }}
+        run: terraform apply -auto-approve
