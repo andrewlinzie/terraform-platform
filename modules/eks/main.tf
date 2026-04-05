@@ -19,8 +19,8 @@ resource "aws_eks_cluster" "this" {
 }
 
 resource "aws_launch_template" "eks_nodes" {
-  name_prefix   = "${var.project_name}-${var.environment}-eks-nodes-"
-  key_name      = var.eks_node_ssh_key_name
+  name_prefix            = "${var.project_name}-${var.environment}-eks-nodes-"
+  key_name               = var.eks_node_ssh_key_name
   update_default_version = true
 
   tag_specifications {
