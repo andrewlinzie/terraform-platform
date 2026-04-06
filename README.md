@@ -57,6 +57,71 @@ Each environment:
 
 ---
 
+## Terraform CI/CD Workflow
+
+Infrastructure is provisioned and managed through **GitHub Actions**, not manual local execution.
+
+### Execution Model
+
+#### Pull Requests
+On any Terraform-related change:
+
+- `terraform fmt -check`
+- `terraform validate`
+- `terraform plan`
+
+Plans are executed for all environments:
+- `dev`
+- `staging`
+- `prod`
+
+This ensures that changes to shared modules or configuration are validated across all environments before merge.
+
+---
+
+#### Push to `main`
+
+On merge to `main`, **dev may auto-apply**, but only when relevant:
+
+Auto-apply is triggered if changes affect:
+- `modules/**`
+- `backend/**`
+- `.github/workflows/**`
+- `environments/dev/**`
+
+Auto-apply is **NOT triggered** if changes only affect:
+- `environments/staging/**`
+- `environments/prod/**`
+
+This prevents unnecessary or misleading deployments in dev.
+
+---
+
+#### Manual Execution (workflow_dispatch)
+
+Controlled execution is required for higher environments:
+
+- **staging**
+  - apply → manual
+  - destroy → manual
+
+- **prod**
+  - apply → manual
+  - destroy → manual
+
+This enforces safe promotion and avoids accidental production changes.
+
+---
+
+#### Destroy Behavior
+
+Destroy operations are:
+- always manually triggered
+- environment-specific
+- executed through the same CI workflow
+
+---
+
 ## Repository Structure
 
 ```
