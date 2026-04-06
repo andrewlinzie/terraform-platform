@@ -38,6 +38,31 @@ permissions:
   contents: read
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      shared: ${{ steps.filter.outputs.shared }}
+      dev: ${{ steps.filter.outputs.dev }}
+      staging: ${{ steps.filter.outputs.staging }}
+      prod: ${{ steps.filter.outputs.prod }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared:
+              - 'modules/**'
+              - 'backend/**'
+              - '.github/workflows/**'
+            dev:
+              - 'environments/dev/**'
+            staging:
+              - 'environments/staging/**'
+            prod:
+              - 'environments/prod/**'
+              
   set-context:
     runs-on: ubuntu-latest
     outputs:
@@ -108,10 +133,21 @@ jobs:
 
   apply:
     runs-on: ubuntu-latest
-    needs: [set-context, plan]
+    needs: [detect-changes, set-context, plan]
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.set-context.outputs.environment == 'dev') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+      (
+        github.event_name == 'push' &&
+        github.ref == 'refs/heads/main' &&
+        needs.set-context.outputs.environment == 'dev' &&
+        (
+          needs.detect-changes.outputs.shared == 'true' ||
+          needs.detect-changes.outputs.dev == 'true'
+        )
+      ) ||
+      (
+        github.event_name == 'workflow_dispatch' &&
+        github.event.inputs.action == 'apply'
+      )
     environment: ${{ needs.set-context.outputs.environment }}
     env:
       TF_VAR_trusted_cidr_blocks: ${{ secrets.TF_VAR_trusted_cidr_blocks }}
