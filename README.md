@@ -277,6 +277,7 @@ Each environment has:
 
 ## Repository Structure
 
+```
 terraform-platform/
 ├── modules/                # Reusable Terraform modules
 ├── environments/
@@ -285,6 +286,7 @@ terraform-platform/
 │   └── prod/
 ├── backend/                # Remote state configuration
 └── bootstrap/              # Backend provisioning (S3 + DynamoDB)
+```
 
 ---
 
