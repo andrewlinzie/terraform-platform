@@ -1,4 +1,3 @@
-````markdown
 # terraform-platform
 
 ## Purpose
@@ -230,9 +229,7 @@ Not by rebuilding or duplicating container images.
 
 In staging and prod:
 
-```hcl
 repository_names = []
-````
 
 This prevents:
 
@@ -280,7 +277,6 @@ Each environment has:
 
 ## Repository Structure
 
-```
 terraform-platform/
 ├── modules/                # Reusable Terraform modules
 ├── environments/
@@ -289,7 +285,6 @@ terraform-platform/
 │   └── prod/
 ├── backend/                # Remote state configuration
 └── bootstrap/              # Backend provisioning (S3 + DynamoDB)
-```
 
 ---
 
