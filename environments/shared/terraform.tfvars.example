@@ -1,0 +1,40 @@
+aws_region = "us-east-2"
+
+project_name = "ai-cloud-platform"
+environment  = "shared"
+
+repository_names = [
+  "api-service",
+  "ai-inference-service",
+  "cms-monolith",
+]
+
+vpc_cidr = "10.3.0.0/16"
+
+public_subnet_cidrs = [
+  "10.3.1.0/24",
+  "10.3.2.0/24",
+]
+
+private_subnet_cidrs = [
+  "10.3.11.0/24",
+  "10.3.12.0/24",
+]
+
+availability_zones = [
+  "us-east-2a",
+  "us-east-2b",
+]
+
+# Replace with your public IP (e.g., 203.0.113.10/32)
+trusted_cidr_blocks = [
+  "YOUR_PUBLIC_IP/32",
+]
+
+jenkins_instance_type = "t3.medium"
+
+# EC2 key pair name in AWS (same idea as cms_key_name in tier envs)
+jenkins_key_name = "ai-cloud-platform-shared-jenkins-key"
+
+# Paste your SSH public key to enable ssh ec2-user@<jenkins-public-ip>; leave "" for SSM only
+jenkins_public_key = "YOUR_SSH_PUBLIC_KEY"

@@ -25,12 +25,6 @@ trusted_cidr_blocks = [
   "YOUR_PUBLIC_IP/32"
 ]
 
-repository_names = [
-  "api-service",
-  "ai-inference-service",
-  "cms-monolith"
-]
-
 cluster_name       = "ai-cloud-platform-dev-eks"
 kubernetes_version = "1.33"
 

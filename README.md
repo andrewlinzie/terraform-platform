@@ -43,82 +43,101 @@ The platform provisions:
 
 ## Environment Model
 
-Supports three isolated environments:
+**Runtime / tier environments** (each with its own VPC, EKS, CMS, and isolated state):
 
 - `dev`
 - `staging`
 - `prod`
 
-Each environment:
+**Shared platform stack** (separate state; not a deployment tier):
+
+- `shared` — shared resources used by every tier (for example, **ECR** repositories)
+
+Each stack:
+
 - Uses separate Terraform state (S3 + DynamoDB)
-- Has isolated VPC CIDR ranges
-- Uses environment-specific naming and scaling
-- Shares the same infrastructure architecture
+- Tier environments (`dev` / `staging` / `prod`) have isolated VPC CIDR ranges, naming, and scaling
+- Shares the same module-based architecture
 
 ---
 
 ## Terraform CI/CD Workflow
 
-Infrastructure is provisioned and managed through **GitHub Actions**, not manual local execution.
+Infrastructure is provisioned and managed through **GitHub Actions**, not manual local execution. The workflow file is **`.github/workflows/terraform-infra.yml`** (GitHub UI: **Terraform Infra**).
 
-### Execution Model
+### Default automation: `dev` only (PR and push)
 
-#### Pull Requests
-On any Terraform-related change:
+For **pull requests** and **pushes** to `main`, the workflow always uses **`environments/dev`** as the working directory (unless you use **workflow_dispatch**). It runs:
 
-- `terraform fmt -check`
-- `terraform validate`
-- `terraform plan`
+- `terraform fmt -check` (recursive from repo root)
+- `terraform validate` in `environments/dev`
+- `terraform plan` in `environments/dev` with `ci.tfvars`
 
-Plans are executed for all environments:
-- `dev`
-- `staging`
-- `prod`
+So **PRs validate and plan the dev stack**. Edits to **shared modules** still show up in **dev’s** plan because dev composes those modules.
 
-This ensures that changes to shared modules or configuration are validated across all environments before merge.
+**Important:** A PR that changes **only** `environments/shared/**`, `environments/staging/**`, or `environments/prod/**` does **not** automatically plan that directory in the default pipeline—the job still targets **dev**. For those stacks, use **`workflow_dispatch`** (below) or run Terraform **locally** in the correct `environments/<name>` directory.
 
 ---
 
-#### Push to `main`
+### Pull requests
+
+On Terraform-related path changes, the workflow runs **fmt / validate / plan for dev** as described above.
+
+---
+
+### Push to `main`
 
 On merge to `main`, **dev may auto-apply**, but only when relevant.
 
-Auto-apply is triggered if changes affect:
+Auto-apply runs when path filters detect changes under:
+
 - `modules/**`
 - `backend/**`
 - `.github/workflows/**`
 - `environments/dev/**`
 
-Auto-apply is **NOT triggered** if changes only affect:
+Auto-apply does **not** run when changes are limited to:
+
 - `environments/staging/**`
 - `environments/prod/**`
+- `environments/shared/**`
 
-This prevents unnecessary or misleading deployments in dev.
-
----
-
-#### Manual Execution (workflow_dispatch)
-
-Controlled execution is required for higher environments:
-
-- **staging**
-  - apply → manual
-  - destroy → manual
-
-- **prod**
-  - apply → manual
-  - destroy → manual
-
-This enforces safe promotion and avoids accidental production changes.
+That keeps merges to staging/prod/shared-only paths from silently applying **dev**.
 
 ---
 
-#### Destroy Behavior
+### `shared` — explicit operator action only
+
+The **`shared`** stack (e.g. ECR) is **not** part of the default PR plan target and is **not** auto-applied on push to `main`. Applying it is always an **explicit** choice:
+
+1. **GitHub Actions:** open **Actions** → **Terraform Infra** → **Run workflow** → set **environment** to **`shared`** and **action** to **`apply`** (plan runs in the same workflow before apply).
+2. **Local:** from `terraform-platform/environments/shared`, run `terraform init` with `backend/shared.hcl`, then `plan` / `apply` with the appropriate var files.
+
+Apply **`shared`** before anything that depends on its resources (for example, pushing images to ECR).
+
+---
+
+### Manual execution (`workflow_dispatch`)
+
+Use **workflow_dispatch** for stacks that must not follow the dev-only automation:
+
+| Environment | Apply / destroy |
+|-------------|-------------------|
+| `shared`    | Manual only (operator triggers workflow or runs locally) |
+| `staging`   | Manual |
+| `prod`      | Manual |
+
+`dev` can also be run manually via dispatch when you want an explicit apply outside the push-to-`main` path.
+
+---
+
+### Destroy behavior
 
 Destroy operations are:
+
 - always manually triggered
 - environment-specific
-- executed through the same CI workflow
+- executed through **`terraform-infra.yml`** via **`workflow_dispatch`**, action **destroy**
 
 ---
 
@@ -158,10 +177,12 @@ Examples:
 - cluster naming
 - scaling parameters
 
-Each environment has its own:
+Each stack has its own committed `ci.tfvars`:
+
 - `environments/dev/ci.tfvars`
 - `environments/staging/ci.tfvars`
 - `environments/prod/ci.tfvars`
+- `environments/shared/ci.tfvars`
 
 ---
 
@@ -172,6 +193,17 @@ Each environment has its own:
 Examples:
 - `TF_VAR_trusted_cidr_blocks`
 - `TF_VAR_cms_public_key`
+- `TF_VAR_jenkins_public_key` — injected for all Terraform jobs; **only `environments/shared`** uses it (Jenkins EC2 key pair). Tier stacks declare an unused `jenkins_public_key` variable with default `""` so Terraform accepts the same env in one workflow. It is set to the same secret as `TF_VAR_cms_public_key` by default (one operator key); use a separate secret if Jenkins should use a different key.
+
+---
+
+### SSH keys and network access (tradeoffs)
+
+This platform is aimed at a **personal / dev** workflow. The default CI wiring **reuses the same SSH public key** for the CMS instances (tier stacks) and the Jenkins controller (`shared`): one **private key** on your machine can open **both** hosts (under different EC2 key pair names in AWS). That keeps operations simple but **widens blast radius** if that private key is ever compromised.
+
+**Mitigation used here:** **`trusted_cidr_blocks`** (and the Jenkins security group) restrict **SSH (22)** and **Jenkins UI (8080)** to addresses you list—typically **your home/public IP** (`x.x.x.x/32`). That is an important barrier: random internet hosts cannot attempt those ports even if they somehow learn a key name. Update the CIDR when your IP changes.
+
+**If you harden later:** use **separate** key pairs (and secrets) for CMS vs Jenkins, rely more on **SSM Session Manager** (IAM-gated, no long-lived EC2 key pair), or both—especially if the project grows beyond solo dev.
 
 ---
 
@@ -180,7 +212,7 @@ Examples:
 - **No secrets are committed to Git**
 - **CI is fully non-interactive**
 - **Local and CI configurations are clearly separated**
-- **All environments use consistent variable structure**
+- **Tier environments (`dev` / `staging` / `prod`) use a consistent variable shape; `shared` adds platform-only inputs (ECR, Jenkins, its VPC)**
 
 This design ensures:
 - secure handling of sensitive data
@@ -195,12 +227,17 @@ Amazon ECR is treated as **shared infrastructure**, not environment-specific inf
 
 ### Design Decision
 
-ECR repositories are created **once per AWS account/region**, not per environment.
+In Terraform, ECR repositories are created **only** in the **`shared`** stack (`environments/shared`, `module.ecr`). **`dev`**, **`staging`**, and **`prod`** do **not** instantiate the ECR module, expose ECR outputs, or carry `repository_names` variables.
 
-Repositories:
+Repository names (immutable tags / CI image URIs) are still the usual three:
+
 - `api-service`
 - `ai-inference-service`
 - `cms-monolith`
+
+### Downstream references (tier stacks)
+
+Today, tier environments **do not** use `terraform_remote_state` to read the shared stack. Image pulls and CI use **account- and region-scoped ECR URLs** (for example in GitHub Actions variables and GitOps values). Add **`terraform_remote_state` → `shared`** only if a tier stack must consume Terraform outputs such as repository ARNs or URLs.
 
 ---
 
@@ -220,16 +257,10 @@ Not by rebuilding or duplicating container images.
 
 ### Environment Behavior
 
-- **dev**
-  - may create or reference ECR repositories
-- **staging**
-  - does NOT create ECR repositories
-- **prod**
-  - does NOT create ECR repositories
-
-In staging and prod:
-
-repository_names = []
+- **shared**
+  - owns shared **ECR** repositories (immutable artifacts for all envs)
+- **dev**, **staging**, **prod**
+  - do **not** create ECR repositories; they consume images from the shared registry
 
 This prevents:
 
@@ -261,6 +292,7 @@ Each environment has:
 * its own backend config file:
 
   * `backend/dev.hcl`
+  * `backend/shared.hcl`
   * `backend/staging.hcl`
   * `backend/prod.hcl`
 * isolated state
@@ -282,6 +314,7 @@ terraform-platform/
 ├── modules/                # Reusable Terraform modules
 ├── environments/
 │   ├── dev/
+│   ├── shared/             # Shared platform (e.g. ECR)
 │   ├── staging/
 │   └── prod/
 ├── backend/                # Remote state configuration
@@ -326,12 +359,13 @@ terraform apply
 
 Terraform should be executed through:
 
-* **GitHub Actions (primary path)**
+* **GitHub Actions (primary path)** — **`.github/workflows/terraform-infra.yml`**; default PR/push jobs target **dev**; **`shared`** and higher tiers use **workflow_dispatch** or local runs (see **Terraform CI/CD Workflow** above).
 
 Local execution is intended only for:
 
 * development
 * debugging
+* **`shared`** (or other stacks) when you choose not to use Actions
 
 ---
 

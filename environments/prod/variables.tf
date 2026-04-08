@@ -38,11 +38,6 @@ variable "trusted_cidr_blocks" {
   type        = list(string)
 }
 
-variable "repository_names" {
-  description = "List of ECR repositories to create"
-  type        = list(string)
-}
-
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
@@ -98,4 +93,11 @@ variable "eks_node_ssh_key_name" {
 variable "cms_public_key" {
   description = "SSH public key material used to create the CMS EC2 key pair"
   type        = string
+}
+
+variable "jenkins_public_key" {
+  description = "Unused in this stack; declared so CI can set TF_VAR_jenkins_public_key for the shared stack without Terraform rejecting it"
+  type        = string
+  default     = ""
+  sensitive   = true
 }

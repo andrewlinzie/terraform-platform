@@ -20,8 +20,6 @@ availability_zones = [
   "us-east-2b"
 ]
 
-repository_names = []
-
 cluster_name       = "ai-cloud-platform-staging-eks"
 kubernetes_version = "1.33"
 

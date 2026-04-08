@@ -53,21 +53,6 @@ output "cms_instance_profile_name" {
   value       = module.iam.cms_instance_profile_name
 }
 
-output "ecr_repository_urls" {
-  description = "Repository URLs for ECR repositories"
-  value       = module.ecr.repository_urls
-}
-
-output "ecr_repository_names" {
-  description = "Repository names created in ECR"
-  value       = module.ecr.repository_names
-}
-
-output "ecr_repository_arns" {
-  description = "Repository ARNs for ECR repositories"
-  value       = module.ecr.repository_arns
-}
-
 output "eks_cluster_name" {
   description = "EKS cluster name"
   value       = module.eks.cluster_name

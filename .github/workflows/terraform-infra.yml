@@ -23,6 +23,7 @@ on:
         type: choice
         options:
           - dev
+          - shared
           - staging
           - prod
       action:
@@ -91,7 +92,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.set-context.outputs.environment == 'dev' && secrets.AWS_ROLE_ARN_DEV || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_PROD }}
+          role-to-assume: ${{ needs.set-context.outputs.environment == 'prod' && secrets.AWS_ROLE_ARN_PROD || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_DEV }}
           aws-region: us-east-2
 
       - name: Terraform Init
@@ -113,6 +114,8 @@ jobs:
     env:
       TF_VAR_trusted_cidr_blocks: ${{ secrets.TF_VAR_trusted_cidr_blocks }}
       TF_VAR_cms_public_key: ${{ secrets.TF_VAR_cms_public_key }}
+      # Used only by environments/shared (Jenkins SSH key pair). Tier envs declare the variable with default "" so Terraform accepts the env var.
+      TF_VAR_jenkins_public_key: ${{ secrets.TF_VAR_cms_public_key }}
     steps:
       - uses: actions/checkout@v4
 
@@ -120,7 +123,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.set-context.outputs.environment == 'dev' && secrets.AWS_ROLE_ARN_DEV || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_PROD }}
+          role-to-assume: ${{ needs.set-context.outputs.environment == 'prod' && secrets.AWS_ROLE_ARN_PROD || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_DEV }}
           aws-region: us-east-2
 
       - name: Terraform Init
@@ -152,6 +155,7 @@ jobs:
     env:
       TF_VAR_trusted_cidr_blocks: ${{ secrets.TF_VAR_trusted_cidr_blocks }}
       TF_VAR_cms_public_key: ${{ secrets.TF_VAR_cms_public_key }}
+      TF_VAR_jenkins_public_key: ${{ secrets.TF_VAR_cms_public_key }}
     steps:
       - uses: actions/checkout@v4
 
@@ -159,7 +163,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.set-context.outputs.environment == 'dev' && secrets.AWS_ROLE_ARN_DEV || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_PROD }}
+          role-to-assume: ${{ needs.set-context.outputs.environment == 'prod' && secrets.AWS_ROLE_ARN_PROD || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_DEV }}
           aws-region: us-east-2
 
       - name: Terraform Init
@@ -178,6 +182,7 @@ jobs:
     env:
       TF_VAR_trusted_cidr_blocks: ${{ secrets.TF_VAR_trusted_cidr_blocks }}
       TF_VAR_cms_public_key: ${{ secrets.TF_VAR_cms_public_key }}
+      TF_VAR_jenkins_public_key: ${{ secrets.TF_VAR_cms_public_key }}
     steps:
       - uses: actions/checkout@v4
 
@@ -185,7 +190,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.set-context.outputs.environment == 'dev' && secrets.AWS_ROLE_ARN_DEV || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_PROD }}
+          role-to-assume: ${{ needs.set-context.outputs.environment == 'prod' && secrets.AWS_ROLE_ARN_PROD || needs.set-context.outputs.environment == 'staging' && secrets.AWS_ROLE_ARN_STAGING || secrets.AWS_ROLE_ARN_DEV }}
           aws-region: us-east-2
 
       - name: Terraform Init

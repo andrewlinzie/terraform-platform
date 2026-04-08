@@ -20,12 +20,6 @@ availability_zones = [
   "us-east-2b"
 ]
 
-repository_names = [
-  "api-service",
-  "ai-inference-service",
-  "cms-monolith"
-]
-
 cluster_name       = "ai-cloud-platform-dev-eks"
 kubernetes_version = "1.33"
 
