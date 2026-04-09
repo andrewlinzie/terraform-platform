@@ -27,9 +27,10 @@ resource "aws_iam_role_policy_attachment" "jenkins_ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_iam_role_policy_attachment" "jenkins_ecr_readonly" {
+# Push/pull images to shared ECR from the Jenkins controller (pipeline docker push).
+resource "aws_iam_role_policy_attachment" "jenkins_ecr_poweruser" {
   role       = aws_iam_role.jenkins_ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
 }
 
 resource "aws_iam_instance_profile" "jenkins" {
