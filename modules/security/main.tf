@@ -93,8 +93,8 @@ resource "aws_security_group" "cms" {
 
   ingress {
     description = "FastAPI/dev app access from trusted CIDRs"
-    from_port   = 8000
-    to_port     = 8000
+    from_port   = 8002
+    to_port     = 8002
     protocol    = "tcp"
     cidr_blocks = var.trusted_cidr_blocks
   }

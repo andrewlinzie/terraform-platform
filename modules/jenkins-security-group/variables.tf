@@ -14,6 +14,11 @@ variable "vpc_id" {
 }
 
 variable "trusted_cidr_blocks" {
-  description = "CIDR blocks allowed to reach Jenkins (SSH and UI)"
+  description = "CIDR blocks allowed for SSH/admin access"
+  type        = list(string)
+}
+
+variable "jenkins_web_ingress_cidr_blocks" {
+  description = "CIDR blocks allowed for Jenkins web ingress on port 8080"
   type        = list(string)
 }

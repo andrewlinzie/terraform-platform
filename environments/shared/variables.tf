@@ -39,7 +39,12 @@ variable "availability_zones" {
 }
 
 variable "trusted_cidr_blocks" {
-  description = "CIDR blocks allowed to reach Jenkins (SSH and port 8080)"
+  description = "CIDR blocks allowed to reach Jenkins over SSH/admin access"
+  type        = list(string)
+}
+
+variable "jenkins_web_ingress_cidr_blocks" {
+  description = "CIDR blocks allowed to reach Jenkins web UI/webhook port 8080"
   type        = list(string)
 }
 

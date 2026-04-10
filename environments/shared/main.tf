@@ -41,10 +41,11 @@ module "vpc" {
 module "jenkins_security_group" {
   source = "../../modules/jenkins-security-group"
 
-  project_name        = var.project_name
-  environment         = var.environment
-  vpc_id              = module.vpc.vpc_id
-  trusted_cidr_blocks = var.trusted_cidr_blocks
+  project_name                    = var.project_name
+  environment                     = var.environment
+  vpc_id                          = module.vpc.vpc_id
+  trusted_cidr_blocks             = var.trusted_cidr_blocks
+  jenkins_web_ingress_cidr_blocks = var.jenkins_web_ingress_cidr_blocks
 }
 
 module "iam_jenkins" {

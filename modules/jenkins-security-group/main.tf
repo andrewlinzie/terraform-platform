@@ -12,11 +12,11 @@ resource "aws_security_group" "jenkins" {
   }
 
   ingress {
-    description = "Jenkins web UI from trusted CIDRs"
+    description = "Jenkins web UI/webhook ingress"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = var.trusted_cidr_blocks
+    cidr_blocks = var.jenkins_web_ingress_cidr_blocks
   }
 
   egress {
