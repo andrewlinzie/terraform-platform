@@ -86,3 +86,29 @@ module "ec2_cms" {
   cms_instance_profile_name = module.iam.cms_instance_profile_name
   key_name                  = var.cms_key_name
 }
+
+resource "kubernetes_namespace" "argocd" {
+  metadata {
+    name = "argocd"
+  }
+
+  depends_on = [module.eks]
+}
+
+resource "kubernetes_namespace" "apps" {
+  metadata {
+    name = "apps"
+  }
+
+  depends_on = [module.eks]
+}
+
+resource "helm_release" "argocd" {
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  namespace        = kubernetes_namespace.argocd.metadata[0].name
+  create_namespace = false
+
+  depends_on = [kubernetes_namespace.argocd]
+}
