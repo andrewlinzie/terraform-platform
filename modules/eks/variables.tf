@@ -73,3 +73,15 @@ variable "eks_node_ssh_key_name" {
   type        = string
   default     = null
 }
+
+variable "enable_cluster_admin_access_entry" {
+  description = "Whether to create an EKS access entry granting cluster-admin permissions"
+  type        = bool
+  default     = false
+}
+
+variable "cluster_admin_principal_arn" {
+  description = "IAM principal ARN to grant cluster-admin access to the EKS cluster"
+  type        = string
+  default     = null
+}

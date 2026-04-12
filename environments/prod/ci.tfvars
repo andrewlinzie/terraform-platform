@@ -33,3 +33,5 @@ eks_node_ssh_key_name = null
 
 cms_instance_type = "t3.large"
 cms_key_name      = "ai-cloud-platform-prod-cms-key"
+
+enable_cluster_admin_access_entry = true

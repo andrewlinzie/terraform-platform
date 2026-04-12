@@ -3,6 +3,11 @@ resource "aws_eks_cluster" "this" {
   role_arn = var.eks_cluster_role_arn
   version  = var.kubernetes_version
 
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   vpc_config {
     subnet_ids              = var.private_subnet_ids
     security_group_ids      = [var.eks_cluster_security_group_id]
@@ -75,4 +80,25 @@ resource "aws_eks_node_group" "this" {
   depends_on = [
     aws_eks_cluster.this
   ]
+}
+
+resource "aws_eks_access_entry" "cluster_admin" {
+  count = var.enable_cluster_admin_access_entry ? 1 : 0
+
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = var.cluster_admin_principal_arn
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "cluster_admin" {
+  count = var.enable_cluster_admin_access_entry ? 1 : 0
+
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = var.cluster_admin_principal_arn
+
+  policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
 }

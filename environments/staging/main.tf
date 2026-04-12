@@ -70,6 +70,8 @@ module "eks" {
   node_min_size                 = var.node_min_size
   node_max_size                 = var.node_max_size
   eks_node_ssh_key_name         = var.eks_node_ssh_key_name
+  enable_cluster_admin_access_entry = var.enable_cluster_admin_access_entry
+  cluster_admin_principal_arn       = var.cluster_admin_principal_arn
 }
 
 module "ec2_cms" {
