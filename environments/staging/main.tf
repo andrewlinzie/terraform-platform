@@ -55,21 +55,21 @@ module "iam" {
 module "eks" {
   source = "../../modules/eks"
 
-  project_name                  = var.project_name
-  environment                   = var.environment
-  cluster_name                  = var.cluster_name
-  kubernetes_version            = var.kubernetes_version
-  private_subnet_ids            = module.vpc.private_subnet_ids
-  eks_cluster_role_arn          = module.iam.eks_cluster_role_arn
-  eks_node_role_arn             = module.iam.eks_node_role_arn
-  eks_cluster_security_group_id = module.security.eks_cluster_security_group_id
-  eks_nodes_security_group_id   = module.security.eks_nodes_security_group_id
-  node_group_name               = var.node_group_name
-  node_instance_types           = var.node_instance_types
-  node_desired_size             = var.node_desired_size
-  node_min_size                 = var.node_min_size
-  node_max_size                 = var.node_max_size
-  eks_node_ssh_key_name         = var.eks_node_ssh_key_name
+  project_name                      = var.project_name
+  environment                       = var.environment
+  cluster_name                      = var.cluster_name
+  kubernetes_version                = var.kubernetes_version
+  private_subnet_ids                = module.vpc.private_subnet_ids
+  eks_cluster_role_arn              = module.iam.eks_cluster_role_arn
+  eks_node_role_arn                 = module.iam.eks_node_role_arn
+  eks_cluster_security_group_id     = module.security.eks_cluster_security_group_id
+  eks_nodes_security_group_id       = module.security.eks_nodes_security_group_id
+  node_group_name                   = var.node_group_name
+  node_instance_types               = var.node_instance_types
+  node_desired_size                 = var.node_desired_size
+  node_min_size                     = var.node_min_size
+  node_max_size                     = var.node_max_size
+  eks_node_ssh_key_name             = var.eks_node_ssh_key_name
   enable_cluster_admin_access_entry = var.enable_cluster_admin_access_entry
   cluster_admin_principal_arn       = var.cluster_admin_principal_arn
 }
