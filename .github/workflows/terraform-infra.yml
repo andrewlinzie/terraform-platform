@@ -124,6 +124,8 @@ jobs:
       # Used only by environments/shared (Jenkins SSH key pair). Tier envs declare the variable with default "" so Terraform accepts the env var.
       TF_VAR_jenkins_public_key: ${{ secrets.TF_VAR_cms_public_key }}
       TF_VAR_jenkins_web_ingress_cidr_blocks: ${{ secrets.TF_VAR_jenkins_web_ingress_cidr_blocks }}
+      TF_VAR_enable_cluster_admin_access_entry: ${{ vars.TF_VAR_enable_cluster_admin_access_entry }}
+      TF_VAR_cluster_admin_principal_arn: ${{ vars.TF_VAR_cluster_admin_principal_arn }}
     steps:
       - uses: actions/checkout@v4
 
@@ -165,6 +167,8 @@ jobs:
       TF_VAR_cms_public_key: ${{ secrets.TF_VAR_cms_public_key }}
       TF_VAR_jenkins_public_key: ${{ secrets.TF_VAR_cms_public_key }}
       TF_VAR_jenkins_web_ingress_cidr_blocks: ${{ secrets.TF_VAR_jenkins_web_ingress_cidr_blocks }}
+      TF_VAR_enable_cluster_admin_access_entry: ${{ vars.TF_VAR_enable_cluster_admin_access_entry }}
+      TF_VAR_cluster_admin_principal_arn: ${{ vars.TF_VAR_cluster_admin_principal_arn }}
     steps:
       - uses: actions/checkout@v4
 
@@ -193,6 +197,8 @@ jobs:
       TF_VAR_cms_public_key: ${{ secrets.TF_VAR_cms_public_key }}
       TF_VAR_jenkins_public_key: ${{ secrets.TF_VAR_cms_public_key }}
       TF_VAR_jenkins_web_ingress_cidr_blocks: ${{ secrets.TF_VAR_jenkins_web_ingress_cidr_blocks }}
+      TF_VAR_enable_cluster_admin_access_entry: ${{ vars.TF_VAR_enable_cluster_admin_access_entry }}
+      TF_VAR_cluster_admin_principal_arn: ${{ vars.TF_VAR_cluster_admin_principal_arn }}
     steps:
       - uses: actions/checkout@v4
 
