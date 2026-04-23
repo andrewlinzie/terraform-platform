@@ -114,3 +114,13 @@ resource "helm_release" "argocd" {
 
   depends_on = [kubernetes_namespace.argocd]
 }
+
+resource "helm_release" "metrics_server" {
+  name             = "metrics-server"
+  repository       = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart            = "metrics-server"
+  namespace        = "kube-system"
+  create_namespace = false
+
+  depends_on = [module.eks]
+}
