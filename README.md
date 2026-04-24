@@ -3,6 +3,14 @@
 ## Purpose
 Defines and provisions AWS infrastructure for the ai-cloud-platform using Terraform.
 
+This repository is part of the larger AI Cloud Platform and provides the foundational infrastructure that supports:
+
+- EKS-based microservices (API and AI inference)
+- GitOps-based deployment workflows (ArgoCD)
+- CI/CD pipelines (GitHub Actions and Jenkins)
+
+See the top-level platform repository for full system architecture and workflow.
+
 This includes networking, compute, security, and container registry components required to support a hybrid architecture:
 - Microservices (API + AI) on EKS
 - Internal CMS on EC2
@@ -62,6 +70,14 @@ Each stack:
 ---
 
 ## Terraform CI/CD Workflow
+
+This repository uses a CI-driven execution model where Terraform is applied through GitHub Actions rather than manual local execution.
+
+- dev is automatically validated and applied on merge
+- staging and prod require manual approval
+- shared infrastructure is applied explicitly by the operator
+
+Detailed workflow behavior is documented below.
 
 Infrastructure is provisioned and managed through **GitHub Actions**, not manual local execution. The workflow file is **`.github/workflows/terraform-infra.yml`** (GitHub UI: **Terraform Infra**).
 
@@ -417,18 +433,24 @@ Do NOT commit:
 
 ---
 
-## Does Not Contain
+## What This Repository Does NOT Own
 
-* Application source code
-* GitOps deployment state (Argo CD)
-* Dockerfiles
-* Jenkins pipeline logic
+This repository is responsible for provisioning infrastructure only.
+
+It does NOT:
+
+- Deploy or manage application workloads
+- Define Kubernetes manifests or Helm charts
+- Control application deployment state (handled by GitOps / ArgoCD)
+- Build or publish container images
+
+This separation ensures that infrastructure provisioning, application delivery, and runtime management remain decoupled.
 
 ---
 
 ## Future Enhancements
 
-* GitOps (Argo CD) integration for application deployment
+* Deeper GitOps integration (cross-repo validation, promotion workflows, and policy enforcement)
 * CI pipeline enhancements (caching, parallelization)
 * Observability stack (Prometheus, Grafana)
 * IAM and security hardening
