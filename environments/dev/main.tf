@@ -124,3 +124,12 @@ resource "helm_release" "metrics_server" {
 
   depends_on = [module.eks]
 }
+
+module "observability" {
+  source = "../../modules/observability"
+
+  project_name       = var.project_name
+  environment        = var.environment
+  log_retention_days = 14
+  cms_instance_id    = module.ec2_cms.instance_id
+}
