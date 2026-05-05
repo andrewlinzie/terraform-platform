@@ -67,7 +67,7 @@ resource "aws_cloudwatch_metric_alarm" "cms_status_check_failed" {
     Name        = "${var.project_name}-${var.environment}-cms-status-check-failed"
     Environment = var.environment
     Service     = "cms-monolith"
-    Severity    = "critical"
+    Severity    = "sev2"
   }
 }
 
@@ -92,6 +92,6 @@ resource "aws_cloudwatch_metric_alarm" "cms_cpu_high" {
     Name        = "${var.project_name}-${var.environment}-cms-cpu-high"
     Environment = var.environment
     Service     = "cms-monolith"
-    Severity    = "warning"
+    Severity    = "sev3"
   }
 }
