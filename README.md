@@ -452,9 +452,32 @@ This separation ensures that infrastructure provisioning, application delivery, 
 
 * Deeper GitOps integration (cross-repo validation, promotion workflows, and policy enforcement)
 * CI pipeline enhancements (caching, parallelization)
-* Observability stack (Prometheus, Grafana)
 * IAM and security hardening
 * Advanced deployment strategies (blue/green, canary)
+
+---
+
+## Observability (CloudWatch)
+
+Terraform provisions AWS-native observability resources for infrastructure and CMS monitoring.
+
+### Includes
+
+- CloudWatch log groups for:
+  - EKS services
+  - CMS EC2 instance
+  - Jenkins deployments
+- CloudWatch alarms for:
+  - EC2 status checks
+  - CPU utilization thresholds
+
+### Design Principle
+
+Infrastructure observability is managed via Terraform, ensuring:
+
+- consistency across environments
+- version-controlled monitoring configuration
+- alignment with infrastructure lifecycle
 
 ---
 
