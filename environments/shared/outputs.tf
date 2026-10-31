@@ -37,3 +37,13 @@ output "shared_vpc_id" {
   description = "VPC ID for the shared (Jenkins) network"
   value       = module.vpc.vpc_id
 }
+
+output "dvc_artifacts_bucket_id" {
+  description = "S3 bucket name for DVC artifacts"
+  value       = module.dvc_artifacts.bucket_id
+}
+
+output "dvc_artifacts_bucket_arn" {
+  description = "S3 bucket ARN for DVC artifacts"
+  value       = module.dvc_artifacts.bucket_arn
+}

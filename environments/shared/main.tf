@@ -75,3 +75,10 @@ module "jenkins" {
   jenkins_instance_profile_name = module.iam_jenkins.jenkins_instance_profile_name
   key_name                      = length(aws_key_pair.jenkins) > 0 ? aws_key_pair.jenkins[0].key_name : null
 }
+
+module "dvc_artifacts" {
+  source = "../../modules/dvc-artifacts"
+
+  project_name = var.project_name
+  environment  = var.environment
+}
