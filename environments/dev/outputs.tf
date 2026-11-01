@@ -77,3 +77,28 @@ output "cms_public_ip" {
   description = "CMS EC2 public IP"
   value       = module.ec2_cms.public_ip
 }
+
+output "eks_cluster_managed_security_group_id" {
+  description = "Security group AWS attaches to managed nodes. MLflow Postgres allows 5432 from this group."
+  value       = module.eks.cluster_security_group_id
+}
+
+output "mlflow_db_endpoint" {
+  description = "MLflow RDS hostname"
+  value       = module.mlflow_backing.db_endpoint
+}
+
+output "mlflow_db_secret_arn" {
+  description = "Secrets Manager ARN for the MLflow RDS master password"
+  value       = module.mlflow_backing.db_secret_arn
+}
+
+output "mlflow_irsa_role_arn" {
+  description = "IAM role ARN for the MLflow service account"
+  value       = module.mlflow_backing.irsa_role_arn
+}
+
+output "mlflow_artifacts_prefix_uri" {
+  description = "S3 URI prefix for MLflow artifacts"
+  value       = module.mlflow_backing.artifacts_prefix_uri
+}

@@ -27,3 +27,18 @@ output "cluster_certificate_authority_data" {
   description = "Base64-encoded certificate data required to communicate with the EKS cluster"
   value       = aws_eks_cluster.this.certificate_authority[0].data
 }
+
+output "oidc_provider_arn" {
+  description = "IAM OIDC provider ARN for IRSA"
+  value       = aws_iam_openid_connect_provider.eks.arn
+}
+
+output "oidc_issuer_url" {
+  description = "EKS OIDC issuer URL, including https://"
+  value       = aws_eks_cluster.this.identity[0].oidc[0].issuer
+}
+
+output "cluster_security_group_id" {
+  description = "Security group AWS attaches to the managed nodes"
+  value       = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+}

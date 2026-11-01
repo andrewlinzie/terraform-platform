@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 data "aws_ami" "amazon_linux_2023" {
   most_recent = true
   owners      = ["amazon"]
@@ -72,6 +74,20 @@ module "eks" {
   eks_node_ssh_key_name             = var.eks_node_ssh_key_name
   enable_cluster_admin_access_entry = var.enable_cluster_admin_access_entry
   cluster_admin_principal_arn       = var.cluster_admin_principal_arn
+}
+
+module "mlflow_backing" {
+  source = "../../modules/mlflow-backing"
+
+  project_name                  = var.project_name
+  environment                   = var.environment
+  vpc_id                        = module.vpc.vpc_id
+  private_subnet_ids            = module.vpc.private_subnet_ids
+  eks_cluster_security_group_id = module.eks.cluster_security_group_id
+  oidc_provider_arn             = module.eks.oidc_provider_arn
+  oidc_issuer_url               = module.eks.oidc_issuer_url
+  artifacts_bucket_name         = "${var.project_name}-${data.aws_caller_identity.current.account_id}-dvc"
+  postgres_engine_version       = "16.15"
 }
 
 module "ec2_cms" {
