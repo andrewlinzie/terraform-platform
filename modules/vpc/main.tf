@@ -30,13 +30,16 @@ resource "aws_subnet" "public" {
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = true
 
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-public-${count.index + 1}"
-    Project     = var.project_name
-    Environment = var.environment
-    Tier        = "public"
-    ManagedBy   = "terraform"
-  }
+  tags = merge(
+    {
+      Name        = "${var.project_name}-${var.environment}-public-${count.index + 1}"
+      Project     = var.project_name
+      Environment = var.environment
+      Tier        = "public"
+      ManagedBy   = "terraform"
+    },
+    var.public_subnet_tags,
+  )
 }
 
 resource "aws_subnet" "private" {

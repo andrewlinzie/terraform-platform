@@ -86,19 +86,3 @@ resource "aws_security_group" "mlflow_alb" {
     Purpose     = "mlflow-alb"
   }
 }
-
-resource "aws_ec2_tag" "public_elb_role" {
-  for_each = toset(var.public_subnet_ids)
-
-  resource_id = each.value
-  key         = "kubernetes.io/role/elb"
-  value       = "1"
-}
-
-resource "aws_ec2_tag" "public_cluster" {
-  for_each = toset(var.public_subnet_ids)
-
-  resource_id = each.value
-  key         = "kubernetes.io/cluster/${var.cluster_name}"
-  value       = "shared"
-}

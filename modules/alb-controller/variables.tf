@@ -18,16 +18,6 @@ variable "vpc_cidr" {
   type        = string
 }
 
-variable "public_subnet_ids" {
-  description = "Public subnet IDs that will host the internet-facing ALB. At least two AZs."
-  type        = list(string)
-}
-
-variable "cluster_name" {
-  description = "EKS cluster name used in the subnet discovery tag"
-  type        = string
-}
-
 variable "trusted_cidr_blocks" {
   description = "Admin CIDRs allowed to open HTTP to the MLflow ALB. Same list as the rest of the dev stack."
   type        = list(string)

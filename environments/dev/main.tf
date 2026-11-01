@@ -36,6 +36,10 @@ module "vpc" {
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
   availability_zones   = var.availability_zones
+  public_subnet_tags = {
+    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+  }
 }
 
 module "security" {
@@ -83,8 +87,6 @@ module "alb_controller" {
   environment         = var.environment
   vpc_id              = module.vpc.vpc_id
   vpc_cidr            = var.vpc_cidr
-  public_subnet_ids   = module.vpc.public_subnet_ids
-  cluster_name        = module.eks.cluster_name
   trusted_cidr_blocks = var.trusted_cidr_blocks
   oidc_provider_arn   = module.eks.oidc_provider_arn
   oidc_issuer_url     = module.eks.oidc_issuer_url

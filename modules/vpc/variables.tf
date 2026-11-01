@@ -27,3 +27,9 @@ variable "availability_zones" {
   description = "Availability zones for subnet placement"
   type        = list(string)
 }
+
+variable "public_subnet_tags" {
+  description = "Extra tags merged onto every public subnet. Empty for stacks that have no load balancer."
+  type        = map(string)
+  default     = {}
+}

@@ -28,6 +28,12 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+
+  # The controller tags security groups it attaches. Those keys stay out of this plan.
+  # kubernetes.io tags on the public subnets are set on the subnet resource itself.
+  ignore_tags {
+    key_prefixes = ["elbv2.k8s.aws/"]
+  }
 }
 
 data "aws_eks_cluster_auth" "this" {
