@@ -102,3 +102,13 @@ output "mlflow_artifacts_prefix_uri" {
   description = "S3 URI prefix for MLflow artifacts"
   value       = module.mlflow_backing.artifacts_prefix_uri
 }
+
+output "alb_controller_irsa_role_arn" {
+  description = "IAM role ARN for the AWS Load Balancer Controller service account"
+  value       = module.alb_controller.irsa_role_arn
+}
+
+output "mlflow_alb_security_group_id" {
+  description = "Security group id to put on the MLflow Ingress. Do not commit the CIDRs."
+  value       = module.alb_controller.mlflow_alb_security_group_id
+}

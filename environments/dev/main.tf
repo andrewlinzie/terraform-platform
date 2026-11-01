@@ -76,6 +76,20 @@ module "eks" {
   cluster_admin_principal_arn       = var.cluster_admin_principal_arn
 }
 
+module "alb_controller" {
+  source = "../../modules/alb-controller"
+
+  project_name        = var.project_name
+  environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
+  vpc_cidr            = var.vpc_cidr
+  public_subnet_ids   = module.vpc.public_subnet_ids
+  cluster_name        = module.eks.cluster_name
+  trusted_cidr_blocks = var.trusted_cidr_blocks
+  oidc_provider_arn   = module.eks.oidc_provider_arn
+  oidc_issuer_url     = module.eks.oidc_issuer_url
+}
+
 module "mlflow_backing" {
   source = "../../modules/mlflow-backing"
 
