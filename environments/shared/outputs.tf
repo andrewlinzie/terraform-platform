@@ -47,3 +47,8 @@ output "dvc_artifacts_bucket_arn" {
   description = "S3 bucket ARN for DVC artifacts"
   value       = module.dvc_artifacts.bucket_arn
 }
+
+output "github_actions_ci_role_arns" {
+  description = "GitHub Actions CI role ARNs keyed by ECR repository name"
+  value       = module.github_actions_ci.role_arns
+}

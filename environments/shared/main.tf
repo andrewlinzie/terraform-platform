@@ -82,3 +82,32 @@ module "dvc_artifacts" {
   project_name = var.project_name
   environment  = var.environment
 }
+
+module "github_actions_ci" {
+  source = "../../modules/github-actions-ci"
+
+  github_org          = "andrewlinzie"
+  ecr_repository_arns = module.ecr.repository_arns
+
+  repositories = {
+    "ai-inference-service" = {
+      role_name       = "github-actions-ai-inference-service-dev"
+      github_repo     = "ai-inference-service"
+      ecr_policy_name = "ai-inference-service-ecr-push-dev"
+      push_sid        = "AllowPushToAIInferenceServiceRepo"
+    }
+    "api-service" = {
+      role_name       = "github-actions-api-service-dev"
+      github_repo     = "api-service"
+      ecr_policy_name = "api-service-ecr-push-dev"
+      push_sid        = "AllowPushToApiServiceRepo"
+    }
+  }
+
+  mlflow_read = {
+    repository_key = "ai-inference-service"
+    policy_name    = "ai-inference-read-mlflow"
+    bucket_arn     = module.dvc_artifacts.bucket_arn
+    prefix         = "mlflow"
+  }
+}
