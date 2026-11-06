@@ -112,3 +112,13 @@ output "mlflow_alb_security_group_id" {
   description = "Security group id to put on the MLflow Ingress. Do not commit the CIDRs."
   value       = module.alb_controller.mlflow_alb_security_group_id
 }
+
+output "inference_prediction_log_role_arn" {
+  description = "IAM role ARN for the inference service account that writes monitoring/predictions"
+  value       = module.model_monitoring.inference_role_arn
+}
+
+output "model_drift_role_arn" {
+  description = "IAM role ARN for the model drift job and exporter"
+  value       = module.model_monitoring.drift_role_arn
+}
