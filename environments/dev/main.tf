@@ -106,6 +106,16 @@ module "mlflow_backing" {
   postgres_engine_version       = "16.15"
 }
 
+module "model_monitoring" {
+  source = "../../modules/model-monitoring"
+
+  project_name          = var.project_name
+  environment           = var.environment
+  oidc_provider_arn     = module.eks.oidc_provider_arn
+  oidc_issuer_url       = module.eks.oidc_issuer_url
+  artifacts_bucket_name = "${var.project_name}-${data.aws_caller_identity.current.account_id}-dvc"
+}
+
 module "ec2_cms" {
   source = "../../modules/ec2-cms"
 
